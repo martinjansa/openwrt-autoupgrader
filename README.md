@@ -26,13 +26,17 @@ Steps:
 
 1) clone this repository on the workstation machine. The root directory of the cloned repo will be later referred as **{git_repo}**.
 
-2) copy the configuration files **#{git_repo}/config/default/openwrt-autoupgrader** and **{git_repo}/config/default/deploy** into the folder **{git_repo}/config/private/** under the same names openwrt-autoupgrader and deploy. The files {git_repo}/config/private/openwrt-autoupgrader is deployed to the router and {git_repo}/config/private/deploy configures the deployement scrit. These files are ignored by git, so modifying them does not cause the changes in the repository.
+2) copy the configuration files **{git_repo}/config/default/openwrt-autoupgrader** and **{git_repo}/config/default/deploy** into the folder **{git_repo}/config/private/** under the same names openwrt-autoupgrader and deploy. The files {git_repo}/config/private/openwrt-autoupgrader is deployed to the router and {git_repo}/config/private/deploy configures the deployement scrit. These files are ignored by git, so modifying them does not cause the changes in the repository.
 
 3) modify the configuration file {git_repo}/config/private/openwrt-autoupgrader. WARNING: please be extremely carefull here as specifying a wrong version of the HW will most likely cause your router to be bricked.
 
 4) modify the configuration file {git_repo}/config/private/deploy.
 
-5) run {git_repo}/bin/deploy.sh, which deploys the upgrader files into the router.
+5) run **make deploy** from the {git_repo}/ folder to deploy the upgrader files into the router.
+
+    ```bash
+    make deploy
+    ```
 
 6) connect to the router via the and run the upgrade of the OpenWrt firmware
 
