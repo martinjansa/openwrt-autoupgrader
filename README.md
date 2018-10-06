@@ -18,9 +18,9 @@ Prerequisities:
 
     To verify run following command that should open the console on the:
 
-        ```bash
-        ssh root@192.168.1.1
-        ```
+    ```bash
+    ssh root@192.168.1.1
+    ```
 
 Steps:
 
@@ -41,7 +41,7 @@ Steps:
 6) connect to the router via the and run the upgrade of the OpenWrt firmware
 
     ```bash
-    # connect to the router (user your router's IP address)
+    # connect to the router (use your router's IP address)
     ssh root@192.168.1.1
 
     # run the firmware upgrade

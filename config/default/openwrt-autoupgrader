@@ -1,1 +1,11 @@
-TODO
+# Configuration file for the openwtr-autoupgrader tool.
+# See the README.MD of the further description of how to use.
+
+# Values router_hw_* specify the router HW brand, model and version as used in OpenWrt Table of Hardware list.
+# To determine the values, open https://openwrt.org/toh/start and fill in your router brand, model and version
+# in the header of the table so that the table show just a single row with the right router.
+# Warning: specifying from values here will cause the autoupgrader to download the firmware for wrong HW and 
+#          could 'brick' your router.
+router_hw_brand=""
+router_hw_model=""
+router_hw_version=""

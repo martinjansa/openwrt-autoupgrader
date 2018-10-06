@@ -1,5 +1,7 @@
 #!/bin/bash
 
+printf "OpenWrt-Autoupgrader - Deployment\n"
+
 # configuration file path
 CFG_FILE=config/private/deploy
 
