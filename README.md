@@ -22,6 +22,20 @@ Prerequisities:
     ssh root@192.168.1.1
     ```
 
+3) Wget with SSL support installed on the router
+
+    The OpenWrt pages are SSL secured and redirect the HTTP traffic to HTTPS, so the only way to download the binaries is via the secure
+    protocol, which is the only reasonable way nowadays anyway.
+
+    ```bash
+    opkg update
+    opkg install wget
+    opkg install libustream-openssl
+    opkg install ca-certificates
+    ```
+
+    See more at: https://wiki.openwrt.org/doc/howto/wget-ssl-certs
+
 Steps:
 
 1) clone this repository on the workstation machine. The root directory of the cloned repo will be later referred as **{git_repo}**.
