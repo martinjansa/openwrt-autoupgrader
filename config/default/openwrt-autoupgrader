@@ -6,6 +6,14 @@
 # in the header of the table so that the table show just a single row with the right router.
 # Warning: specifying from values here will cause the autoupgrader to download the firmware for wrong HW and 
 #          could 'brick' your router.
+
 router_hw_brand=""
 router_hw_model=""
 router_hw_version=""
+
+# This value contains the link to the hasdware data page of the router without the hostname. To determine the value open the 
+# https://openwrt.org/toh/hwdata/start and search for your router. This value must match the values above.
+#
+# Example: router_hwdata_url="/toh/hwdata/tp-link/tp-link_archer_c7_v4"
+
+router_hwdata_url=""

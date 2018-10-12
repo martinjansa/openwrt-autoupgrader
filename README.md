@@ -6,7 +6,10 @@ This repository contains a set of scripts that can help you keep your OpenWRT ro
 
 All the upgrade script run directly from the router specifically from the /usr/local/sbin/openwrt-autoupgrader.sh and use the configuration file /usr/local/etc/openwrt-autoupgrader. From the security reasons we tipically don't want to open the access from the router to other machines, which implies that the scrip itself cannot perform the backup of the router configuration to other machine before the upgrade and the backups need to be done in other way.
 
-The upgrade script checks the availability of the new upgrade (TODO: so far hardcoded), if a newer version of the firmware is found (compared to the data in the /etc/openwrt_release), downloads it to the /tmp, performs the firmware upgrade and installation of the custom packages (TODO: not done yet).
+The upgrade script checks the availability of the new upgrade, if a newer version of the firmware is found (compared to the data in the /etc/openwrt_release), downloads it to the /tmp, performs the firmware upgrade and installation of the custom packages (TODO: not done yet).
+
+The detection of the available version and upgrade binary package uses cross-checks of the information from two different web pages
+(list of hardware table and hardware data page) to make sure we are really downloading and applying the intended firmware package.
 
 ## Configuration and deployment
 
