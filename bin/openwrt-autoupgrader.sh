@@ -90,6 +90,8 @@ DETECTED_LATEST_OPENWRT_VERSION=`grep '<tr><td class="leftalign rownumbers">1</t
 
 printf "Detected latest available release version is $DETECTED_LATEST_OPENWRT_VERSION.\n"
 
+rm "$TABLE_OF_HW_FILE"
+
 
 # Comparing of the current and available release version
 
@@ -120,6 +122,9 @@ UPGRADE_BIN_URL=`grep "$UPGRADE_URL_PREFIX" "$HW_DATA_FILE" | sed "s/$UPGRADE_UR
 
 printf "Detected upgrade bin URL is \"$UPGRADE_BIN_URL\".\n"
 
+rm "$HW_DATA_FILE"
+
+
 # Cross-checks of the upgrade bin URL:
 #  - should contain the latest version detected before.
 #  - should contain the current distribution target.
@@ -127,10 +132,17 @@ printf "Detected upgrade bin URL is \"$UPGRADE_BIN_URL\".\n"
 
 if [[ "`echo $UPGRADE_BIN_URL | grep $DETECTED_LATEST_OPENWRT_VERSION | wc -l`" != "1" ]]; then printf "Error: Detected upgrade bin URL does not contain the expected release version.\n"; exit 1; fi
 if [[ "`echo $UPGRADE_BIN_URL | grep $INSTALLED_OPENWRT_TARGET        | wc -l`" != "1" ]]; then printf "Error: Detected upgrade bin URL does not contain the expected release target.\n"; exit 1; fi
-if [[ "`echo $UPGRADE_BIN_URL | grep 'sysupgrade.bin'                | wc -l`" != "1" ]]; then printf "Error: Detected upgrade bin URL does not contain the expected suffix \"sysupgrade.bin\".\n"; exit 1; fi
+if [[ "`echo $UPGRADE_BIN_URL | grep 'sysupgrade.bin'                 | wc -l`" != "1" ]]; then printf "Error: Detected upgrade bin URL does not contain the expected suffix \"sysupgrade.bin\".\n"; exit 1; fi
 
 
+# Download the bin file
+
+UPGRADE_BIN_FILE=/tmp/openwrt`echo $UPGRADE_BIN_URL | sed "s/\/openwrt/|/g" | awk -F  "|" '{print $2}'`
+
+printf "Downloading the OpenWrt upgrade bin file into $UPGRADE_BIN_FILE... "
+
+wget -O "$UPGRADE_BIN_FILE" "$UPGRADE_BIN_URL" > /dev/null 2>&1
+WGET_RETVAL=$?; if [[ $WGET_RETVAL = 0 ]]; then printf "OK.\n"; else printf "Wget failed with error $WGET_RETVAL.\n"; exit 1; fi
+
+printf "Now you should verify the sha265 of the file $UPGRADE_BIN_FILE and then run sysupgrade -v $UPGRADE_BIN_FILE.\n"
 printf "To be continued.\n"
-
-
-# http://downloads.openwrt.org/releases/18.06.1/targets/ar71xx/generic/openwrt-18.06.1-ar71xx-generic-archer-c7-v4-squashfs-sysupgrade.bin
