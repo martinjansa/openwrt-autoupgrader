@@ -59,7 +59,9 @@ if [[ "$ROUTER_HW_VERSION" != "" ]]; then TABLE_OF_HW_URL="$TABLE_OF_HW_URL${URL
 
 TABLE_OF_HW_FILE="/tmp/openwrt_autoupgrader_table_of_hw.html"
 
-printf "Downloading the OpenWrt table of HW from '$TABLE_OF_HW_URL' into $TABLE_OF_HW_FILE... "
+printf "The OpenWrt table of HW filter query is '$TABLE_OF_HW_URL'.\n"
+
+printf "Downloading the table of HW page into $TABLE_OF_HW_FILE... "
 
 wget -O "$TABLE_OF_HW_FILE" "$TABLE_OF_HW_URL" > /dev/null 2>&1
 WGET_RETVAL=$?; if [[ $WGET_RETVAL = 0 ]]; then printf "OK.\n"; else printf "Wget failed with error $WGET_RETVAL.\n"; exit 1; fi
@@ -88,7 +90,7 @@ TO_BE_REPLACED_2='\" class=\"wikilink1\"'
 
 DETECTED_LATEST_OPENWRT_VERSION=`grep '<tr><td class="leftalign rownumbers">1</td>' "$TABLE_OF_HW_FILE" | sed "s/$TO_BE_REPLACED_1/|/g" | sed "s/$TO_BE_REPLACED_2/|/g" | awk -F  "|" '{print $2}'`
 
-printf "Detected latest available release version is $DETECTED_LATEST_OPENWRT_VERSION.\n"
+printf "Latest available release version for the hardware is $DETECTED_LATEST_OPENWRT_VERSION.\n"
 
 rm "$TABLE_OF_HW_FILE"
 
@@ -137,12 +139,37 @@ if [[ "`echo $UPGRADE_BIN_URL | grep 'sysupgrade.bin'                 | wc -l`" 
 
 # Download the bin file
 
-UPGRADE_BIN_FILE=/tmp/openwrt`echo $UPGRADE_BIN_URL | sed "s/\/openwrt/|/g" | awk -F  "|" '{print $2}'`
+UPGRADE_BIN_FILE_NAME="openwrt`echo $UPGRADE_BIN_URL | sed "s/\/openwrt/|/g" | awk -F  "|" '{print $2}'`"
+UPGRADE_BIN_PATH="/tmp/$UPGRADE_BIN_FILE_NAME"
 
-printf "Downloading the OpenWrt upgrade bin file into $UPGRADE_BIN_FILE... "
+printf "Downloading the OpenWrt upgrade bin file into $UPGRADE_BIN_PATH... "
 
-wget -O "$UPGRADE_BIN_FILE" "$UPGRADE_BIN_URL" > /dev/null 2>&1
+wget -O "$UPGRADE_BIN_PATH" "$UPGRADE_BIN_URL" > /dev/null 2>&1
 WGET_RETVAL=$?; if [[ $WGET_RETVAL = 0 ]]; then printf "OK.\n"; else printf "Wget failed with error $WGET_RETVAL.\n"; exit 1; fi
 
-printf "Now you should verify the sha265 of the file $UPGRADE_BIN_FILE and then run sysupgrade -v $UPGRADE_BIN_FILE.\n"
+
+# Verify the checksum of the downloaded bin file
+
+# calculate the SHA256 checksum of the downloaded bin file
+DOWNLOADED_CHECKSUM="`sha256sum \"$UPGRADE_BIN_PATH\" | awk -F " " '{print $1}'`"
+
+printf "SHA256 checksum of the downloaded file is $DOWNLOADED_CHECKSUM.\n"
+
+# Download the directory listing of the update bins for the given release and target
+
+RELEASE_DIR_LISTING_URL="https://downloads.lede-project.org/releases/$DETECTED_LATEST_OPENWRT_VERSION/targets/$INSTALLED_OPENWRT_TARGET/"
+RELEASE_DIR_LISTING_FILE="/tmp/openwrt_autoupgrader_release_dir_listing.html"
+
+printf "OpenWrt release $DETECTED_LATEST_OPENWRT_VERSION and target $INSTALLED_OPENWRT_TARGET bin files listing URL is '$RELEASE_DIR_LISTING_URL'.\n"
+printf "Downloading the OpenWrt release bin files listing into $RELEASE_DIR_LISTING_FILE... "
+
+wget -O "$RELEASE_DIR_LISTING_FILE" "$RELEASE_DIR_LISTING_URL" > /dev/null 2>&1
+WGET_RETVAL=$?; if [[ $WGET_RETVAL = 0 ]]; then printf "OK.\n"; else printf "Wget failed with error $WGET_RETVAL.\n"; exit 1; fi
+
+# search for the checksum value of the downloaded bin in the release directory listing. If not found, fail.
+CHECKSUM_VALID=`grep "$UPGRADE_BIN_FILE_NAME" "$RELEASE_DIR_LISTING_FILE" | grep "$DOWNLOADED_CHECKSUM" | wc -l`
+if [[ "$CHECKSUM_VALID" != "1" ]]; then printf "Error: The checksum does not match the value in the release listing directory."; exit 1; fi
+
+printf "SHA256 checksum is matching.\n"
+
 printf "To be continued.\n"

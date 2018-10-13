@@ -10,6 +10,7 @@ The upgrade script checks the availability of the new upgrade, if a newer versio
 
 The detection of the available version and upgrade binary package uses cross-checks of the information from two different web pages
 (list of hardware table and hardware data page) to make sure we are really downloading and applying the intended firmware package.
+The checksum of the downloaded bin file is compared to the checksum listed in the directory listing on the OpenWrt site.
 
 ## Configuration and deployment
 
