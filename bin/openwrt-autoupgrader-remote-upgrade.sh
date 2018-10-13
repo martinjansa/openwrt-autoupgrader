@@ -41,7 +41,7 @@ if [[ $REMOTE_UPGRADE_DONE = 1 ]]; then
     for i in $(seq 1 10); do sleep 1s; printf "-"; done
 
     # wait for 1 min for the router IP to be reachable again
-    for i in $(seq 1 20); do 
+    for i in $(seq 1 120); do 
         sleep 1s; 
         # ping the machine one and check the result
         ping -i 0.2 -c 1 -t 1 -W 1 $ROUTER_HOSTNAME > /dev/null 2>&1
