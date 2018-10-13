@@ -187,11 +187,13 @@ if [[ "$MODE" = "upgrade_firmware" ]]; then
 
     printf "WARNING: Performing the firmware upgrade from $INSTALLED_OPENWRT_VERSION to $DETECTED_LATEST_OPENWRT_VERSION!\n"
 
-    printf "TODO: Run the firmware upgrade via sysupgrade -v '$UPGRADE_BIN_PATH'.\n"
+    printf "Running sysupgrade -v '$UPGRADE_BIN_PATH'...\n"
 
-    # reboot
+    # run the firmware upgrade
+    sysupgrade -v $UPGRADE_BIN_PATH
 
-    exit 1
+    # this command will not most likely be executed
+    exit 0
 
 fi
 
