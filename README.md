@@ -56,7 +56,7 @@ Steps:
     make deploy
     ```
 
-6) connect to the router via the and run the upgrade of the OpenWrt firmware
+6) connect to the router SSH and run the upgrade of the OpenWrt firmware
 
     ```bash
     # connect to the router (use your router's IP address)

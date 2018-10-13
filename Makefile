@@ -1,2 +1,2 @@
 deploy:	
-	./bin/openwrt-autoupgrader_deploy.sh
+	./bin/openwrt-autoupgrader-deploy.sh
