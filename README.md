@@ -56,11 +56,35 @@ Steps:
     make deploy
     ```
 
-6) Now your are ready to run the autoupgrader in several way. You are use it either manually from your workstation, configure it into the cron on the router or run it from cron from other computer (your workstation or other server).
+6) Now your are ready to run the autoupgrader in several ways. You are use it either manually from your workstation, configure it into the cron on the router or run it from cron from other computer (your workstation or other server). See the following chapter for details.
 
-6A) Manual running of the remote router upgrade
+## Usage
 
-    connect to the router via the SSH and run the upgrade of the OpenWrt firmware
+### Automated upgrades started daily from the router cron
+
+    Add following three lines into the /etc/crontab to run the automated upgrades daily at 01:30 - 01:45. Please note the times reserved for the duration of the individual operations:
+    
+    ```
+    30 1 * * * root /usr/local/sbin/openwrt-autoupgrader.sh upgrade_firmware
+    40 1 * * * root /usr/local/sbin/openwrt-autoupgrader.sh install_extra_packages
+    45 1 * * * root /usr/local/sbin/openwrt-autoupgrader.sh upgrade_packages
+    ```
+
+### Automated upgrades started daily remotely from other machine
+
+    If you want to run the upgrades in one block, minimize the time the extra packages are not running after the firmware upgrade, log the progress or output or monitor the potential failures, you can use the cron on the other system to run the remote automated upgrades. The example bellow runs daily upgrades at 01:30.
+
+    ```
+    30 1 * * * root /usr/local/sbin/openwrt-autoupgrader-remote-upgrade.sh root@192.168.1.1
+    ```
+
+    Note: you can run the router backup right before the upgrade from the same cron.
+
+### Manual running of the remote router upgrade
+
+    You can use this to test and debug the automated upgrades configuration.
+
+    1) connect to the router via the SSH and run the upgrade of the OpenWrt firmware
 
     ```bash
     # connect to the router (use your router's IP address)
@@ -72,7 +96,7 @@ Steps:
     # Note: if the firmware is upgraded, router restarts here
     ```
 
-    In case of upgrade, wait for the router to restart (use ping to monitor router) and the re-connect to the router via the SSH and re-install the extra OPKG packages and upgrade the all OPKG packages via:
+    2) In case of upgrade, wait for the router to restart (use ping to monitor router) and the re-connect to the router via the SSH and re-install the extra OPKG packages and upgrade the all OPKG packages via:
 
     ```bash
     # connect to the router (use your router's IP address)
@@ -84,21 +108,3 @@ Steps:
     # upgrade the OPKG packages
     /usr/local/sbin/openwrt-autoupgrader.sh upgrade_packages
     ```
-
-6B) Use the cron on the router to run the automated upgrades daily at 01:30 - 01:45
-
-    Add following three lines into the crontab, please note the times reserved for individual operations:
-    
-    ```
-    30 1 * * * root /usr/local/sbin/openwrt-autoupgrader.sh upgrade_firmware
-    40 1 * * * root /usr/local/sbin/openwrt-autoupgrader.sh install_extra_packages
-    45 1 * * * root /usr/local/sbin/openwrt-autoupgrader.sh upgrade_packages
-    ```
-
-6C) Use the cron on the other system to run the remote automated upgrades daily at 01:30
-
-    ```
-    30 1 * * * root ./bin/openwrt-autoupgrader-remote-upgrade.sh root@192.168.1.1
-    ```
-
-    This option will make sure that the packages operations are done right after the firmware upgrade.
