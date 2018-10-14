@@ -44,7 +44,7 @@ Steps:
 
 1) clone this repository on the workstation machine. The root directory of the cloned repo will be later referred as **{git_repo}**.
 
-2) copy the configuration files **{git_repo}/config/default/openwrt-autoupgrader** and **{git_repo}/config/default/deploy** into the folder **{git_repo}/config/private/** under the same names openwrt-autoupgrader and deploy. The files {git_repo}/config/private/openwrt-autoupgrader is deployed to the router and {git_repo}/config/private/deploy configures the deployement scrit. These files are ignored by git, so modifying them does not cause the changes in the repository.
+2) copy the configuration files **{git_repo}/config/default/openwrt-autoupgrader** and **{git_repo}/config/default/deploy** into the folder **{git_repo}/config/private/** under the same names openwrt-autoupgrader and deploy. The files {git_repo/config/private/openwrt-autoupgrader is deployed to the router and {git_repo}/config/private/deploy configures the deployement scrit. These files are ignored by git, so modifying them does not cause the changes in the repository.
 
 3) modify the configuration file {git_repo}/config/private/openwrt-autoupgrader. WARNING: please be extremely carefull here as specifying a wrong version of the HW will most likely cause your router to be bricked.
 
@@ -56,7 +56,11 @@ Steps:
     make deploy
     ```
 
-6) connect to the router SSH and run the upgrade of the OpenWrt firmware
+6) Now your are ready to run the autoupgrader in several way. You are use it either manually from your workstation, configure it into the cron on the router or run it from cron from other computer (your workstation or other server).
+
+6A) Manual running of the remote router upgrade
+
+    connect to the router via the SSH and run the upgrade of the OpenWrt firmware
 
     ```bash
     # connect to the router (use your router's IP address)
@@ -67,3 +71,34 @@ Steps:
 
     # Note: if the firmware is upgraded, router restarts here
     ```
+
+    In case of upgrade, wait for the router to restart (use ping to monitor router) and the re-connect to the router via the SSH and re-install the extra OPKG packages and upgrade the all OPKG packages via:
+
+    ```bash
+    # connect to the router (use your router's IP address)
+    ssh root@192.168.1.1
+
+    # re-install the extra OPLG packages after the firmware upgrade
+    /usr/local/sbin/openwrt-autoupgrader.sh install_extra_packages
+
+    # upgrade the OPKG packages
+    /usr/local/sbin/openwrt-autoupgrader.sh upgrade_packages
+    ```
+
+6B) Use the cron on the router to run the automated upgrades daily at 01:30 - 01:45
+
+    Add following three lines into the crontab, please note the times reserved for individual operations:
+    
+    ```
+    30 1 * * * root /usr/local/sbin/openwrt-autoupgrader.sh upgrade_firmware
+    40 1 * * * root /usr/local/sbin/openwrt-autoupgrader.sh install_extra_packages
+    45 1 * * * root /usr/local/sbin/openwrt-autoupgrader.sh upgrade_packages
+    ```
+
+6C) Use the cron on the other system to run the remote automated upgrades daily at 01:30
+
+    ```
+    30 1 * * * root ./bin/openwrt-autoupgrader-remote-upgrade.sh root@192.168.1.1
+    ```
+
+    This option will make sure that the packages operations are done right after the firmware upgrade.

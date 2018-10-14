@@ -7,9 +7,10 @@ printf "OpenWrt-Autoupgrader\n"
 
 MODE=""
 case "$1" in 
-"upgrade_firmware") MODE="upgrade_firmware"; printf "Firmware upgrade mode.\n" ;;
-"upgrade_packages") MODE="upgrade_packages"; printf "Packages upgrade mode.\n"  ;;
-*) printf "Usage openwrt-autoupgrader.sh {mode}\nWhere {mode} is either 'upgrade_firmware' to perform firmware upgrade or 'upgrade_packages' for upgrade the packages.\n"; exit 1 ;;
+"upgrade_firmware")              MODE="upgrade_firmware";              printf "Firmware upgrade mode.\n" ;;
+"install_extra_packages")        MODE="install_extra_packages";        printf "Firmware upgrade fix packages mode.\n" ;;
+"upgrade_packages")              MODE="upgrade_packages";              printf "Packages upgrade mode.\n"  ;;
+*) printf "Usage openwrt-autoupgrader.sh {mode}\nWhere {mode} is either 'upgrade_firmware' to perform firmware upgrade or 'install_extra_packages' for install the missing packages after the firmware upgrade or 'upgrade_packages' for upgrade the packages.\n"; exit 1 ;;
 esac
 
 
@@ -40,14 +41,16 @@ ROUTER_HW_BRAND=""
 ROUTER_HW_MODEL=""
 ROUTER_HW_VERSION=""
 ROUTER_HWDATA_URL=""
+EXTRA_OPKG_PACKAGES=""
 
 # parse the config file
 while read -r name value
 do
-    if [[ "$name" = "router_hw_brand"   ]]; then ROUTER_HW_BRAND="${value//\"/}";       fi
-    if [[ "$name" = "router_hw_model"   ]]; then ROUTER_HW_MODEL="${value//\"/}";       fi
-    if [[ "$name" = "router_hw_version" ]]; then ROUTER_HW_VERSION="${value//\"/}";     fi
-    if [[ "$name" = "router_hwdata_url" ]]; then ROUTER_HWDATA_URL="${value//\"/}";     fi
+    if [[ "$name" = "router_hw_brand"     ]]; then ROUTER_HW_BRAND="${value//\"/}";       fi
+    if [[ "$name" = "router_hw_model"     ]]; then ROUTER_HW_MODEL="${value//\"/}";       fi
+    if [[ "$name" = "router_hw_version"   ]]; then ROUTER_HW_VERSION="${value//\"/}";     fi
+    if [[ "$name" = "router_hwdata_url"   ]]; then ROUTER_HWDATA_URL="${value//\"/}";     fi
+    if [[ "$name" = "extra_opkg_packages" ]]; then EXTRA_OPKG_PACKAGES="${value//\"/}";   fi
 done < $CFG_FILE
 
 # dump the loaded configuration
@@ -56,6 +59,7 @@ printf "\trouter hardware brand:    $ROUTER_HW_BRAND\n"
 printf "\trouter hardware model:    $ROUTER_HW_MODEL\n"
 printf "\trouter hardware version:  $ROUTER_HW_VERSION\n"
 printf "\trouter hardware data URL: $ROUTER_HWDATA_URL\n"
+printf "\textra OPKG packages:      $EXTRA_OPKG_PACKAGES\n"
 
 
 if [[ "$MODE" = "upgrade_firmware" ]]; then
@@ -194,14 +198,52 @@ if [[ "$MODE" = "upgrade_firmware" ]]; then
 
     # this command will not most likely be executed
     exit 0
+fi
 
+if [[ "$MODE" = "install_extra_packages" ]]; then
+
+    # update package list
+    opkg update
+    RES=$?
+    if [[ "$RES" != "0" ]]; then printf "Error: OPKG update failed with result $RES.\n"; exit 1; fi
+
+    # configure the separator
+    IFS=$' \t\n'
+
+    for package in $EXTRA_OPKG_PACKAGES; do
+
+        printf "Installing package $package.\n"
+        opkg install $package
+        RES=$?
+        if [[ "$RES" != "0" ]]; then printf "Error: 'opkg install $package' failed with result $RES.\n"; exit 1; fi
+
+    done
+
+    printf "All extra packages were successfully installed.\n"
+    exit 0
 fi
 
 if [[ "$MODE" = "upgrade_packages" ]]; then
 
 
-    printf "TODO: Not implemented yet.\n"
+    # update package list
+    opkg update
+    RES=$?
+    if [[ "$RES" != "0" ]]; then printf "Error: OPKG update failed with result $RES.\n"; exit 1; fi
 
-    exit 1
+    # configure the separator
+    IFS=$' \t\n'
+
+    for package in `opkg list-upgradable | cut -f 1 -d ' '` ; do
+
+        printf "Upgrading package $package.\n"
+        opkg upgrade "$package"
+        RES=$?
+        if [[ "$RES" != "0" ]]; then printf "Error: 'opkg install $package' failed with result $RES.\n"; exit 1; fi
+
+    done
+
+    printf "All extra packages were successfully upgraded.\n"
+    exit 0
 fi
 

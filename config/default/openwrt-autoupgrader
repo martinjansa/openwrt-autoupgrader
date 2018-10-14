@@ -11,9 +11,18 @@ router_hw_brand=""
 router_hw_model=""
 router_hw_version=""
 
-# This value contains the link to the hasdware data page of the router without the hostname. To determine the value open the 
-# https://openwrt.org/toh/hwdata/start and search for your router. This value must match the values above.
+# The value router_hwdata_url contains the link to the hasdware data page of the router without the hostname. 
+# To determine the value open the https://openwrt.org/toh/hwdata/start and search for your router. This value 
+# must match the values above.
 #
 # Example: router_hwdata_url="/toh/hwdata/tp-link/tp-link_archer_c7_v4"
 
 router_hwdata_url=""
+
+# The value extra_opkg_packages contains the list of the OPKG packages that need to be reinstalled after the 
+# firmware upgrade, which removes all the extra packages. Use a space separated list of the packages.
+#
+# Example: specifies the minimal packages needed for the autoupgrader to work
+# extra_opkg_packages="wget libustream-openssl ca-certificates"
+
+extra_opkg_packages="wget libustream-openssl ca-certificates"

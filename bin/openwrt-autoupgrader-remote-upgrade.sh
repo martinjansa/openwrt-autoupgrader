@@ -29,6 +29,8 @@ FIRMWARE_UPGRADE_LOG_FILE="/tmp/openwrt-autoupgrader-remote-upgrade-ssh.log"
 
 # if the upgrade was started
 REMOTE_UPGRADE_DONE=`grep "WARNING: Performing the firmware upgrade from" "$FIRMWARE_UPGRADE_LOG_FILE" | wc -l`
+rm "$FIRMWARE_UPGRADE_LOG_FILE"
+
 if [[ $REMOTE_UPGRADE_DONE = 1 ]]; then
 
     printf "INFO: The firmware upgrade is being done on the router $ROUTER_HOSTNAME.\n"
@@ -50,17 +52,27 @@ if [[ $REMOTE_UPGRADE_DONE = 1 ]]; then
         printf "..."; 
     done
 
+    # if the router is running
+    if [[ "$ROUTER_RUNNING" = "1" ]]; then printf "\nOK.\nFirmware successfully upgraded, router is up and running.\n"; else printf "\nError.\nError: Router did not boot up after the firmware. Please see the https://github.com/cellux/openwrt-upgrade howto.\n"; exit 1; fi
+
     # wait for annother 10s to make sure the ssh service is up and running on the router
     for i in $(seq 1 10); do sleep 1s; printf "-"; done
 
-    # if the router is running
-    if [[ "$ROUTER_RUNNING" = "1" ]]; then printf "OK.\nFirmware successfully upgraded, router is up and running.\n"; else printf "Error.\nError: Router did not boot up after the firmware. Please see the https://github.com/cellux/openwrt-upgrade howto.\n"; exit 1; fi
+    # run the upgrade fix packages remotely
+    ssh $ROUTER_USERNAME@$ROUTER_HOSTNAME $REMOTE_AUTOUPGRADER_SCRIPT_PATH install_extra_packages
+    SSH_RESULT=$?
+    if [[ "$SSH_RESULT" != "0" ]]; then printf "Remote fix of the packages after the firmware upgrade failed with error $SSH_RESULT.\n"; exit 1; fi
 
 else 
     printf "The firmware upgrade not started on the remote host.\n"
 
 fi
 
-printf "TODO: Remote packages upgrade has not been implemented yet.\n"
+printf "INFO: Running the packages upgrade on $ROUTER_HOSTNAME.\n"
 
-exit 1
+# run the upgrade fix packages remotely
+ssh $ROUTER_USERNAME@$ROUTER_HOSTNAME $REMOTE_AUTOUPGRADER_SCRIPT_PATH upgrade_packages
+SSH_RESULT=$?
+if [[ "$SSH_RESULT" != "0" ]]; then printf "Remote upgrade of the packages failed with error $SSH_RESULT.\n"; exit 1; fi
+
+exit 0
