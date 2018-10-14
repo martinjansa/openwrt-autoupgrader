@@ -50,10 +50,10 @@ Steps:
 
 4) modify the configuration file {git_repo}/config/private/deploy.
 
-5) run **make deploy** from the {git_repo}/ folder to deploy the upgrader files into the router.
+5) run **make remote-deploy** from the {git_repo}/ folder to deploy the upgrader files into the router.
 
     ```bash
-    make deploy
+    make remote-deploy
     ```
 
 6) Now your are ready to run the autoupgrader in several ways. You are use it either manually from your workstation, configure it into the cron on the router or run it from cron from other computer (your workstation or other server). See the following chapter for details.
@@ -79,6 +79,10 @@ If you want to run the upgrades in one block, minimize the time the extra packag
     ```
 
 Note: you can run the router backup right before the upgrade from the same cron.
+Note2: you can install the script from git repo via:
+    ```bash
+	make local-deploy
+	```
 
 ### Manual running of the remote router upgrade
 
