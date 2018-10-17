@@ -1,6 +1,9 @@
 # Configuration file for the openwtr-autoupgrader tool.
 # See the README.MD of the further description of how to use.
 
+# Set to "yes" to allow logging to syslog
+log_to_syslog="no"
+
 # Values router_hw_* specify the router HW brand, model and version as used in OpenWrt Table of Hardware list.
 # To determine the values, open https://openwrt.org/toh/start and fill in your router brand, model and version
 # in the header of the table so that the table show just a single row with the right router.
