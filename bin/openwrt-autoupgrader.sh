@@ -17,6 +17,9 @@ esac
 # configuration file path
 CFG_FILE=/usr/local/etc/openwrt-autoupgrader
 
+# preserve list configuration file
+SYSUPGRADE_FILE=/etc/sysupgrade.conf
+
 # load the configuration
 printf "Loading the configuration from file $CFG_FILE...\n"
 
@@ -69,6 +72,23 @@ function print_and_log {
         printf "$2\n"
     fi
 }
+
+# Make sure the current script and config file are registerd into the preserve file
+function ensure_registration_to_preserve_file {
+
+    ALREADY_REGISTERED=`grep $1 $SYSUPGRADE_FILE | wc -l`
+    if [[ "$ALREADY_REGISTERED" == 0 ]]; then
+
+        print_and_log info "Registering the file $1 into $SYSUPGRADE_FILE"
+        echo "$1" >> $SYSUPGRADE_FILE
+    else
+
+        print_and_log info "The file $1 has already been registered into $SYSUPGRADE_FILE"
+    fi
+}
+
+ensure_registration_to_preserve_file $0
+ensure_registration_to_preserve_file $CFG_FILE
 
 
 # Get the currently installed OpenWrt version
