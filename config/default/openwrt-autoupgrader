@@ -29,3 +29,12 @@ router_hwdata_url=""
 # extra_opkg_packages="wget libustream-openssl ca-certificates"
 
 extra_opkg_packages="wget libustream-openssl ca-certificates"
+
+# The value excluded_opkg_packages contains the list of the OPKG packages that should not be updated to avoid
+# device stability issues. It is recommended to keep the default value, unless you discover some further packages 
+# to be excluded. Use the regexp expression format.
+#
+# Current list:
+#   - netifd   - Network Interface Daemon - breaks and "bricks" the device, when opkg upgrade is run over the SSH
+#                (resolution: soft-reset using https://openwrt.org/docs/guide-user/troubleshooting/failsafe_and_factory_reset)
+excluded_opkg_packages="(netifd)"

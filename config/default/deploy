@@ -1,7 +1,7 @@
 # Configuration file for the deployment of the new version of the openwtr-autoupgrader to the router.
 # See the README.MD of the further description of how to use the deployment.
 
-# target_router_ip specifies the IP address of the router to deploy the autoupgrader to. If must be filled in.
+# target_router_ip specifies the IP address or hostname of the router to deploy the autoupgrader to. Must be filled in.
 target_router_ip=""
 
 # target_router_username specifies the user name of the account to be used to log in to the router. Default is root

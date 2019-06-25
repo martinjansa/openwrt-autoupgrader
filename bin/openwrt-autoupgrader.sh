@@ -33,16 +33,18 @@ ROUTER_HW_MODEL=""
 ROUTER_HW_VERSION=""
 ROUTER_HWDATA_URL=""
 EXTRA_OPKG_PACKAGES=""
+EXCLUDED_OPKG_PACKAGES=""
 
 # parse the config file
 while read -r name value
 do
-    if [[ "$name" = "log_to_syslog"       ]]; then LOG_TO_SYSLOG="${value//\"/}";         fi
-    if [[ "$name" = "router_hw_brand"     ]]; then ROUTER_HW_BRAND="${value//\"/}";       fi
-    if [[ "$name" = "router_hw_model"     ]]; then ROUTER_HW_MODEL="${value//\"/}";       fi
-    if [[ "$name" = "router_hw_version"   ]]; then ROUTER_HW_VERSION="${value//\"/}";     fi
-    if [[ "$name" = "router_hwdata_url"   ]]; then ROUTER_HWDATA_URL="${value//\"/}";     fi
-    if [[ "$name" = "extra_opkg_packages" ]]; then EXTRA_OPKG_PACKAGES="${value//\"/}";   fi
+    if [[ "$name" = "log_to_syslog"          ]]; then LOG_TO_SYSLOG="${value//\"/}";          fi
+    if [[ "$name" = "router_hw_brand"        ]]; then ROUTER_HW_BRAND="${value//\"/}";        fi
+    if [[ "$name" = "router_hw_model"        ]]; then ROUTER_HW_MODEL="${value//\"/}";        fi
+    if [[ "$name" = "router_hw_version"      ]]; then ROUTER_HW_VERSION="${value//\"/}";      fi
+    if [[ "$name" = "router_hwdata_url"      ]]; then ROUTER_HWDATA_URL="${value//\"/}";      fi
+    if [[ "$name" = "extra_opkg_packages"    ]]; then EXTRA_OPKG_PACKAGES="${value//\"/}";    fi
+    if [[ "$name" = "excluded_opkg_packages" ]]; then EXCLUDED_OPKG_PACKAGES="${value//\"/}"; fi
 done < $CFG_FILE
 
 # dump the loaded configuration
@@ -53,6 +55,7 @@ printf "\trouter hardware model:    $ROUTER_HW_MODEL\n"
 printf "\trouter hardware version:  $ROUTER_HW_VERSION\n"
 printf "\trouter hardware data URL: $ROUTER_HWDATA_URL\n"
 printf "\textra OPKG packages:      $EXTRA_OPKG_PACKAGES\n"
+printf "\texcluded OPKG packages:   $EXCLUDED_OPKG_PACKAGES\n"
 
 # Logging function, logs to syslog, if active and prints to stdout or stderr
 # Usage: print_and_log PRI message
@@ -283,10 +286,18 @@ if [[ "$MODE" = "upgrade_packages" ]]; then
 
     for package in `opkg list-upgradable | cut -f 1 -d ' '` ; do
 
-        printf "Upgrading package $package.\n"
-        opkg upgrade "$package"
-        RES=$?
-        if [[ "$RES" != "0" ]]; then print_and_log err "Error: 'opkg install $package' failed with result $RES."; exit 1; fi
+        # check the package name agains the exlucde list
+        EXCLUDE=`echo $package | grep -E "$EXCLUDED_OPKG_PACKAGES" | wc -l`
+        
+        # if should be excluded
+        if [[ "$EXCLUDE" != "0" ]]; then
+            printf "INFO: Skipping excluded package $package.\n"
+        else
+            printf "Upgrading package $package.\n"
+            opkg upgrade "$package"
+            RES=$?
+            if [[ "$RES" != "0" ]]; then print_and_log err "Error: 'opkg upgrade $package' failed with result $RES."; exit 1; fi
+        fi
 
     done
 
